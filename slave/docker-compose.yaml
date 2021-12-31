@@ -1,0 +1,67 @@
+version: '3'
+services:
+    cross:
+        image: muhammad2000/cross
+        restart: always
+        ports:
+            - "5000:80"
+
+    frontend:
+        image: muhammad2000/front
+        restart: always
+        ports:
+            - "4000:4000"
+
+    backend:
+        image: muhammad2000/back
+        restart: always
+        ports:
+            - "3000:3000" #back
+            - "6600:6600" #socker
+        volumes:
+            - /home/slave/project/volumes/media-data/_data:/usr/src/app/views/uploads
+
+    mongo:
+        image: mongo
+        restart: always
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=admin
+            - MONGO_INITDB_ROOT_PASSWORD=password
+        volumes:
+            - /home/slave/project/volumes/mongo-data/_data:/data/db
+
+    mongo-express:
+        image: mongo-express
+        restart: always
+        environment:
+            - ME_CONFIG_MONGODB_SERVER=mongo
+            - ME_CONFIG_MONGODB_PORT=27017
+            - ME_CONFIG_MONGODB_AUTH_USERNAME=admin
+            - ME_CONFIG_MONGODB_AUTH_PASSWORD=password
+        ports:
+            - "8080:8081"
+
+    redis:
+        image: redis
+        restart: always
+        ports:
+            - "6379:6379"
+
+    webserver:
+        image: nginx:latest
+        restart: always
+        ports:
+            - 80:80
+            - 443:443 #secure front
+            - 9900:9900 #secure socker
+            - 9000:9000 #secure back
+        volumes:
+            - /home/slave/project/config/:/etc/nginx/conf.d/:ro
+            - /home/slave/project/certbot/www:/var/www/certbot/:ro
+            - /home/slave/project/certbot/conf/:/etc/nginx/ssl/:ro
+
+    certbot:
+        image: certbot/certbot:latest
+        volumes:
+            - /home/slave/project/certbot/www/:/var/www/certbot/:rw
+            - /home/slave/project/certbot/conf/:/etc/letsencrypt/:rw

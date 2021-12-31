@@ -1,0 +1,25 @@
+ssh -i ./master.pem master@52.170.64.22
+scp -i ./master.pems ./_data master@52.170.64.22:/home/slave/tests
+
+sudo apt update
+sudo apt upgrade
+sudo apt install docker.io
+sudo apt install docker-compose
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+
+
+docker-compose up -d
+docker exec -it /tests_backend_1 bash
+docker logs --tail 1000 /fronttest_container
+docker system prune
+
+crontab -e
+00 00 * * * docker system prune
+*/5 * * * * python3 /home/slave/project/malling_system.py
+*/1 * * * * python3 /home/master/project/monitor_master.py
+
+nohup python3 /home/master/project/com_with_slave.py &
+-------------------------------------------------------------
+ssh -i ./slave_2.pem slave@20.127.119.48 docker restart /project_backend_1
