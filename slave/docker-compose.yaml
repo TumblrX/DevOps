@@ -55,6 +55,7 @@ services:
             - 443:443 #secure front
             - 9900:9900 #secure socker
             - 9000:9000 #secure back
+            - 5500:5500 #secure flutter web
         volumes:
             - /home/slave/project/config/:/etc/nginx/conf.d/:ro
             - /home/slave/project/certbot/www:/var/www/certbot/:ro
